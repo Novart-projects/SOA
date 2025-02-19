@@ -1,0 +1,117 @@
+specification {
+    element person {
+        style {
+            shape person
+            color green
+        }
+    }
+    element database {
+    style {
+      shape cylinder
+      color green
+    }
+  }
+    element softwareSystem
+    element container
+    element component
+}
+
+model {
+  user = person "Пользователь" "Пользователь социальной сети"
+
+  socialNetwork = softwareSystem "Социальная сеть" {
+    apiGateway = container "Сервис Api" {
+      description "Управляет взаимодействием пользователя с системой"
+      technology "GO"
+      style {
+         icon tech:go
+      }
+    }
+
+    mobileApp = container "Мобильное приложение" "Предоставляет интерфейс социальной сети" "Swift"
+
+    userService = container "User Service" {
+      description "Управление пользователями и аутентификация"
+      technology "Gо"
+      style {
+         icon tech:go
+      }
+    }
+
+    postService = container "Post Service" {
+      description "Управление действиями пользователя (посты, комментарии)"
+      technology "Gо"
+      style {
+         icon tech:go
+      }
+    }
+
+
+    statsService = container "Stats Service" {
+      description "Сбор и анализ статистики (лайки, просмотры, комментарии)"
+      technology "Python"
+      style {
+         icon tech:python
+      }
+    }
+
+    clickhouse = database "Statistics DB" {
+      description "Хранение данных пользователей и постов"
+      technology "ClickHouse"
+      style {
+        icon https://simpleicons.org/icons/clickhouse.svg
+      }
+    }
+
+    postgresUserDb = database "User Data DB" {
+      description "Хранение данных пользователей"
+      technology "PostgreSQL"
+      style {
+         icon tech:postgresql
+      }
+    }
+
+    postgresDataDb = database "Posts and Comments Data DB" {
+      description "Хранение постов и комментариев пользователей"
+      technology "PostgreSQL"
+      style {
+         icon tech:postgresql
+      }
+    }
+    
+
+
+   rabbitmq = container "RabbitMQ" {
+      description "Обмен событиями между сервисами"
+      technology "Message Broker"
+      style {
+        shape queue
+        color amber
+        icon https://simpleicons.org/icons/rabbitmq.svg
+      }
+    }
+  }
+
+  user -> socialNetwork.mobileApp "Использует"
+  socialNetwork.mobileApp -> socialNetwork.apiGateway "Использует" "HTTPS"
+  socialNetwork.apiGateway -> socialNetwork.userService "Маршрутизирует"
+  socialNetwork.apiGateway -> socialNetwork.postService "Маршрутизирует"
+  socialNetwork.apiGateway -> socialNetwork.statsService  "Маршрутизирует"
+  socialNetwork.userService -> socialNetwork.postgresUserDb "Читает/Пишет"
+  socialNetwork.postService -> socialNetwork.postgresDataDb "Читает/Пишет"
+  socialNetwork.userService -> socialNetwork.rabbitmq "Публикует/Подписывается" "user_events"
+  socialNetwork.postService -> socialNetwork.rabbitmq "Публикует/Подписывается" "post_events, comment_events, like_events"
+  socialNetwork.statsService -> socialNetwork.rabbitmq "Подписывается" "user_events, post_events, comment_events, like_events"
+  socialNetwork.statsService -> socialNetwork.clickhouse "Читает/Пишет"
+
+  socialNetwork.userService -> socialNetwork.postService "Взаимодействует"
+  socialNetwork.userService -> socialNetwork.statsService "Взаимодействует"
+  socialNetwork.postService -> socialNetwork.statsService "Взаимодействует"
+
+}
+
+views {
+   view index {
+        include *
+    }
+}
