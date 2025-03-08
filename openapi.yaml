@@ -1,0 +1,146 @@
+openapi: 3.1.0
+info:
+  title: FastAPI
+  version: 0.1.0
+paths:
+  /get-profile:
+    get:
+      operationId: update_profile_get_profile_get
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserProfile'
+          description: Successful Response
+      summary: Get Profile
+  /login:
+    post:
+      operationId: login_login_post
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/LoginRequest'
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+          description: Successful Response
+      summary: Login
+  /signup:
+    post:
+      operationId: signup_signup_post
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SignupRequest'
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+          description: Successful Response
+      summary: Signup
+  /update-profile:
+    post:
+      operationId: update_profile_update_profile_post
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateProfileRequest'
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+          description: Successful Response
+      summary: Update Profile
+  /whoami:
+    get:
+      operationId: whoami_whoami_get
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+          description: Successful Response
+      summary: Whoami
+components:
+  schemas:
+    LoginRequest:
+      type: object
+      required:
+        - username
+        - password
+      properties:
+        username:
+          type: string
+        password:
+          type: string
+    SignupRequest:
+      type: object
+      required:
+        - username
+        - password
+        - email
+      properties:
+        username:
+          type: string
+        password:
+          type: string
+        email:
+          type: string
+    UpdateProfileRequest:
+      type: object
+      properties:
+        name:
+          type: string
+        surname:
+          type: string
+        phone-number:
+          type: string
+        birthday:
+          type: string
+        email:
+          type: string
+    UserProfile:
+      type: object
+      properties:
+        username:
+          type: string
+        name:
+          type: string
+        surname:
+          type: string
+        phone_number:
+          type: string
+        birthday:
+          type: string
+        email:
+          type: string
+        create_date:
+          type: string
+          format: date-time
+        update_date:
+          type: string
+          format: date-time
