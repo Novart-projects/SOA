@@ -9,6 +9,7 @@ import uuid
 import jwt
 import pytest
 import requests
+import hashlib
 
 LOGGER = logging.getLogger(__name__)
 
@@ -237,18 +238,35 @@ class TestAuth:
         r = make_requests('GET', auth_addr, '/whoami', cookies={'jwt': token})
         assert r.status_code == 400
     
-    # @staticmethod
-    # def test_update_profile(auth_addr):
-    #     ((username, _), cookies) = user
-    #     profile_data = {'name': 'Артемий', 
-    #                     'surname': 'Новиков', 
-    #                     'phone-number': '+79651234567',
-    #                     'burthday': '11-09-2004',
-    #                     'email': f'{username}_new@mail.com'
-    #                     }
-    #     r = make_requests('POST', auth_addr, '/update-profile', data=profile_data, cookies={'jwt': cookies})
-    #     assert r.status_code == 200
-
+    @staticmethod
+    def test_update_profile(auth_addr, user):
+        ((username, email, password), cookies) = user
+        profile_data = {'name': 'Артемий', 
+                        'surname': 'Новиков', 
+                        'phone-number': '+79651234567',
+                        'birthday': '11-09-2004',
+                        'email': f'{username}_new@mail.com'
+                        }
+        r = make_requests('GET', auth_addr, '/get-profile', cookies=cookies)
+        assert r.status_code == 200
+        assert r.json()['name'] == None
+        assert r.json()['surname'] == None
+        assert r.json()['phone_number'] == None
+        assert r.json()['username'] == username
+        assert r.json()['email'] == email
+        assert r.json()['birthday'] == None
+        assert r.json()['password_hash'] == hashlib.md5((password).encode()).hexdigest()
+        r = make_requests('POST', auth_addr, '/update-profile', data=profile_data, cookies=cookies)
+        assert r.status_code == 200
+        r = make_requests('GET', auth_addr, '/get-profile', cookies=cookies)
+        assert r.status_code == 200
+        assert r.json()['name'] == 'Артемий'
+        assert r.json()['surname'] == 'Новиков'
+        assert r.json()['phone_number'] == '+79651234567'
+        assert r.json()['username'] == username
+        assert r.json()['email'] == f'{username}_new@mail.com'
+        assert r.json()['birthday'] == '11-09-2004'
+        assert r.json()['password_hash'] == hashlib.md5((password).encode()).hexdigest()
 
 class TestProxy:
     @staticmethod
@@ -352,15 +370,33 @@ class TestProxy:
         r = make_requests('GET', proxy_addr, '/whoami', cookies={'jwt': token})
         assert r.status_code == 400
     
-    # @staticmethod
-    # def test_update_profile(proxy_addr):
-    #     ((username, _), cookies) = user
-    #     profile_data = {'name': 'Артемий', 
-    #                     'surname': 'Новиков', 
-    #                     'phone-number': '+79651234567',
-    #                     'burthday': '11-09-2004',
-    #                     'email': f'{username}_new@mail.com'
-    #                     }
-    #     r = make_requests('POST', proxy_addr, '/update-profile', data=profile_data, cookies={'jwt': cookies})
-    #     assert r.status_code == 200
+    @staticmethod
+    def test_update_profile(proxy_addr, user):
+        ((username, email, password), cookies) = user
+        profile_data = {'name': 'Артемий', 
+                        'surname': 'Новиков', 
+                        'phone-number': '+79651234567',
+                        'birthday': '11-09-2004',
+                        'email': f'{username}_new@mail.com'
+                        }
+        r = make_requests('GET', proxy_addr, '/get-profile', cookies=cookies)
+        assert r.status_code == 200
+        assert r.json()['name'] == None
+        assert r.json()['surname'] == None
+        assert r.json()['phone_number'] == None
+        assert r.json()['username'] == username
+        assert r.json()['email'] == email
+        assert r.json()['birthday'] == None
+        assert r.json()['password_hash'] == hashlib.md5((password).encode()).hexdigest()
+        r = make_requests('POST', proxy_addr, '/update-profile', data=profile_data, cookies=cookies)
+        assert r.status_code == 200
+        r = make_requests('GET', proxy_addr, '/get-profile', cookies=cookies)
+        assert r.status_code == 200
+        assert r.json()['name'] == 'Артемий'
+        assert r.json()['surname'] == 'Новиков'
+        assert r.json()['phone_number'] == '+79651234567'
+        assert r.json()['username'] == username
+        assert r.json()['email'] == f'{username}_new@mail.com'
+        assert r.json()['birthday'] == '11-09-2004'
+        assert r.json()['password_hash'] == hashlib.md5((password).encode()).hexdigest()
         
