@@ -24,6 +24,7 @@ Base = declarative_base()
 class User(Base):
     __tablename__ = 'users'
 
+    id = Column(Integer, primary_key=True, autoincrement=True)
     username = Column(String, primary_key=True)
     name = Column(String)
     surname = Column(String)
@@ -104,6 +105,7 @@ async def whoami(request: Request, db: Session = Depends(get_db)):
     user = db.query(User).filter(User.username == username).first()
     if not user:
         raise HTTPException(status_code=400, detail="Bad username")
+    print(user.id)
     return PlainTextResponse(f'Hello, {username}')
 
 @app.post("/update-profile")
