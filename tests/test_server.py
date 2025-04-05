@@ -399,4 +399,86 @@ class TestProxy:
         assert r.json()['email'] == f'{username}_new@mail.com'
         assert r.json()['birthday'] == '11-09-2004'
         assert r.json()['password_hash'] == hashlib.md5((password).encode()).hexdigest()
-        
+
+
+class TestProxyPosts:
+    @staticmethod
+    def test_create_post(proxy_addr, user):
+        ((username, _, _), cookies) = user
+        post_data = {
+            'title': 'Test Post',
+            'description': 'This is a test post',
+            'is_private': True,
+            'tags': ['test', 'post']
+        }
+        r = make_requests('POST', proxy_addr, '/posts/', data=post_data, cookies=cookies)
+        assert r.status_code == 200
+        assert r.json()['title'] == post_data['title']
+        assert r.json()['description'] == post_data['description']
+        assert r.json()['creator_id'] == username
+
+    @staticmethod
+    def test_list_posts(proxy_addr, user):
+        ((username, _, _), cookies) = user
+        r = make_requests('GET', proxy_addr, '/posts/', cookies=cookies)
+        assert r.status_code == 200
+        assert 'posts' in r.json()
+
+    @staticmethod
+    def test_get_post_by_id(proxy_addr, user):
+        ((username, _, _), cookies) = user
+        post_data = {
+            'title': 'Test Post',
+            'description': 'This is a test post',
+            'is_private': True,
+            'tags': ['test', 'post']
+        }
+        r = make_requests('POST', proxy_addr, '/posts/', data=post_data, cookies=cookies)
+        assert r.status_code == 200
+        post_id = r.json()['id']
+
+        r = make_requests('GET', proxy_addr, f'/posts/{post_id}', cookies=cookies)
+        assert r.status_code == 200
+        assert r.json()['id'] == post_id
+
+    @staticmethod
+    def test_update_post(proxy_addr, user):
+        ((username, _, _), cookies) = user
+        post_data = {
+            'title': 'Test Post',
+            'description': 'This is a test post',
+            'is_private': True,
+            'tags': ['test', 'post']
+        }
+        r = make_requests('POST', proxy_addr, '/posts/', data=post_data, cookies=cookies)
+        assert r.status_code == 200
+        post_id = r.json()['id']
+
+        updated_data = {
+            'title': 'Updated Post Title',
+            'description': 'Updated description',
+            'is_private': False,
+            'tags': ['updated', 'test']
+        }
+        r = make_requests('PUT', proxy_addr, f'/posts/{post_id}', data=updated_data, cookies=cookies)
+        assert r.status_code == 200
+        assert r.json()['title'] == updated_data['title']
+
+    @staticmethod
+    def test_delete_post(proxy_addr, user):
+        ((username, _, _), cookies) = user
+        post_data = {
+            'title': 'Test Post',
+            'description': 'This is a test post',
+            'is_private': True,
+            'tags': ['test', 'post']
+        }
+        r = make_requests('POST', proxy_addr, '/posts/', data=post_data, cookies=cookies)
+        assert r.status_code == 200
+        post_id = r.json()['id']
+
+        r = make_requests('DELETE', proxy_addr, f'/posts/{post_id}', cookies=cookies)
+        assert r.status_code == 200
+
+        r = make_requests('GET', proxy_addr, f'/posts/{post_id}', cookies=cookies)
+        assert r.status_code == 404

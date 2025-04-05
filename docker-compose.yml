@@ -12,11 +12,23 @@ services:
     proxy:
         build: 
             context: proxy
+        volumes:
+            - ./auth/signature.pem:/tmp/signature.pem
+            - ./auth/signature.pub:/tmp/signature.pub
         environment:
             AUTH_SERVER_URL: "http://auth:8090"
+            POST_SERVER_URL: "http://post:8090"
+            JWT_PRIVATE_KEY_FILE: "/tmp/signature.pem"
+            JWT_PUBLIC_KEY_FILE: "/tmp/signature.pub"
         command: ["--port", "8090"]
         ports:
             - 8091:8090
+    post:
+        build: 
+            context: post
+        command: ["--port", "8090"]
+        ports:
+            - 8092:8090
 
     tests:
         build:
@@ -32,3 +44,4 @@ services:
         depends_on:
             - auth
             - proxy
+            - post
